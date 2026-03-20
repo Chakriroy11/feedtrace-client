@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useResponsive } from '../hooks/useResponsive'; 
 import './Auth.css'; 
 import logoImg from '../assets/logo.jpg'; 
 
 const Login = () => {
   const navigate = useNavigate();
+  const { isMobile } = useResponsive(); 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
@@ -15,7 +17,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/login`;
     
     try {
@@ -24,110 +25,121 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server Error: Backend connection failed.");
-      }
-
       const data = await res.json();
-
       if (res.ok) {
-        const userData = data.user || data;
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(data.user || data));
         localStorage.setItem('token', data.token);
-        localStorage.setItem('feedtrace_user_name', userData.username || userData.name);
-        
-        toast.success(`Welcome back, ${userData.username || 'User'}!`);
+        toast.success(`Welcome back!`);
         navigate('/home', { replace: true }); 
       } else {
-        toast.error(data.error || "Invalid Email or Password");
+        toast.error(data.error || "Invalid Credentials");
       }
     } catch (err) { 
-      console.error("Login Error:", err);
-      toast.error(err.message || "Connection Error"); 
-    }
-    finally { setLoading(false); }
+      toast.error("Connection failed"); 
+    } finally { setLoading(false); }
   };
 
   return (
-    // 🌟 Using inline flex to force the 50/50 split regardless of CSS issues
-    <div className="auth-container" style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className="auth-container" style={{ 
+      display: 'flex', 
+      flexDirection: isMobile ? 'column' : 'row', 
+      width: '100vw', 
+      height: '100vh',
+      margin: 0,
+      padding: 0,
+      background: '#fff'
+    }}>
       
-      {/* --- LEFT SIDE: EXACT 50% --- */}
-      <div className="auth-left" style={{ flex: '0 0 50%', height: '100%', padding: 0, margin: 0, overflow: 'hidden', position: 'relative' }}>
-        <div className="image-wrapper login-mode" style={{ width: '100%', height: '100%' }}>
-          <img 
-            src={logoImg} 
-            alt="FeedTrace" 
-            className="auth-brand-img" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
-          />
-          <div className="overlay-text" style={{ position: 'absolute', bottom: '10%', left: '10%', zIndex: 2 }}>
-            <h3 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'white', margin: 0 }}>Welcome Back</h3>
-            <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.8)' }}>Sign in to explore verified product insights.</p>
-          </div>
-        </div>
+      {/* --- LEFT SIDE: THE IMAGE (EXACT 50%) --- */}
+      <div className="auth-left" style={{ 
+        flex: isMobile ? '0 0 35%' : '0 0 50%', 
+        height: isMobile ? '35vh' : '100vh',
+        overflow: 'hidden'
+      }}>
+        <img 
+          src={logoImg} 
+          alt="Branding" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
       </div>
 
-      {/* --- RIGHT SIDE: EXACT 50% --- */}
-      <div className="auth-right" style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff' }}>
-        <div className="auth-card" style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
+      {/* --- RIGHT SIDE: THE FORM (CENTERED 50%) --- */}
+      <div className="auth-right" style={{ 
+        flex: isMobile ? '1' : '0 0 50%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: '20px'
+      }}>
+        <div style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
           
-          <div className="auth-header">
-            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#1e293b' }}>Sign In</h2>
-            <p style={{ color: '#64748b' }}>Enter your <span>FeedTrace</span> credentials.</p>
+          {/* Header matching your screenshot gradient */}
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{ 
+              fontSize: isMobile ? '2.8rem' : '3.8rem', 
+              fontWeight: '800', 
+              background: 'linear-gradient(to right, #00AEEF, #6366f1)', 
+              WebkitBackgroundClip: 'text', 
+              WebkitTextFillColor: 'transparent',
+              margin: '0 0 10px 0',
+              lineHeight: '1.1'
+            }}>
+              Sign In
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>
+              Welcome back to <span style={{ color: '#FF7A00', fontWeight: '700' }}>FeedTrace</span>.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <Mail size={20} className="input-icon" color="#94a3b8" />
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Box Sizes and Padding specifically matched to your image */}
+            <div style={{ 
+              display: 'flex', alignItems: 'center', gap: '15px', 
+              background: '#fff', border: '1.5px solid #E2E8F0', 
+              padding: '18px 25px', borderRadius: '15px' 
+            }}>
+              <Mail size={22} color="#94a3b8" />
               <input 
-                type="email" 
-                name="email" 
-                placeholder="Email Address" 
-                required 
-                value={formData.email}
+                type="email" name="email" placeholder="Email Address" required 
                 onChange={handleChange} 
-                autoComplete="email"
+                style={{ border: 'none', outline: 'none', width: '100%', fontSize: '1rem', color: '#1E293B' }} 
               />
             </div>
             
-            <div className="input-group">
-              <Lock size={20} className="input-icon" color="#94a3b8" />
+            <div style={{ 
+              display: 'flex', alignItems: 'center', gap: '15px', 
+              background: '#fff', border: '1.5px solid #E2E8F0', 
+              padding: '18px 25px', borderRadius: '15px' 
+            }}>
+              <Lock size={22} color="#94a3b8" />
               <input 
-                type="password" 
-                name="password" 
-                placeholder="Password" 
-                required 
-                value={formData.password}
+                type="password" name="password" placeholder="Password" required 
                 onChange={handleChange} 
-                autoComplete="current-password"
+                style={{ border: 'none', outline: 'none', width: '100%', fontSize: '1rem', color: '#1E293B' }} 
               />
             </div>
 
-            <button type="submit" disabled={loading} className="auth-btn">
-              {loading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <Loader2 className="animate-spin" size={18} />
-                  Verifying...
-                </div>
-              ) : (
-                <>
-                  Sign In <ArrowRight size={18} style={{ marginLeft: '8px' }} />
-                </>
-              )}
+            {/* Button width matches input boxes exactly */}
+            <button type="submit" disabled={loading} style={{ 
+              background: 'linear-gradient(90deg, #00AEEF 0%, #22c55e 100%)',
+              color: 'white', padding: '18px', border: 'none', borderRadius: '15px',
+              fontSize: '1.2rem', fontWeight: '700', cursor: 'pointer',
+              marginTop: '10px', display: 'flex', alignItems: 'center', 
+              justifyContent: 'center', gap: '12px',
+              boxShadow: '0 10px 15px -3px rgba(0, 174, 239, 0.2)'
+            }}>
+              {loading ? <Loader2 className="animate-spin" size={24} /> : 'Login'}
+              {!loading && <ArrowRight size={22} />}
             </button>
           </form>
 
-          <div className="auth-footer">
-            New to FeedTrace? 
+          <div style={{ marginTop: '35px', color: '#64748b', fontSize: '1.05rem' }}>
+            New here? 
             <span 
               onClick={() => navigate('/signup')} 
-              className="link-text"
-              style={{ cursor: 'pointer', marginLeft: '5px', fontWeight: 'bold', color: '#3b82f6' }}
+              style={{ color: '#22c55e', fontWeight: '800', cursor: 'pointer', marginLeft: '8px' }}
             >
-              Create Account
+              Sign Up
             </span>
           </div>
 
