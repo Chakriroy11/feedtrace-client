@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Copy, CheckCircle, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useResponsive } from '../hooks/useResponsive'; // 🌟 Import your hook
+import { useResponsive } from '../hooks/useResponsive'; 
 
 const AdFooter = () => {
   const [ads, setAds] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedCode, setCopiedCode] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { isMobile } = useResponsive(); // 📱 Check for mobile
+  const { isMobile } = useResponsive(); 
 
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const res = await fetch('${import.meta.env.VITE_API_URL}/api/ads/active');
-        if (res.ok) {
+        // 🚀 FIXED: Changed single quotes to backticks (`)
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ads/active`);
+        
+        // Safety check for JSON content
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           const data = await res.json();
-          setAds(data);
+          // Ensure we only set ads if data is an array
+          setAds(Array.isArray(data) ? data : []);
+        } else {
+          console.warn("Ad API did not return JSON. Check backend route.");
         }
       } catch (err) { 
         console.error("🚨 Network error fetching ads.", err); 
@@ -27,7 +34,7 @@ const AdFooter = () => {
     fetchAds();
   }, []);
 
-  // 🌟 THE FIX: Auto-rotate ads every 8 seconds
+  // Auto-rotate ads every 8 seconds
   useEffect(() => {
     if (ads.length > 1) {
       const interval = setInterval(() => {
@@ -38,6 +45,7 @@ const AdFooter = () => {
   }, [ads]);
 
   const handleCopy = (code) => {
+    if (!code) return;
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
     toast.success(`Coupon ${code} copied!`);
@@ -51,7 +59,7 @@ const AdFooter = () => {
   return (
     <div style={{ 
       position: 'fixed', 
-      bottom: isMobile ? '70px' : 0, // 🌟 Stay above bottom nav on mobile
+      bottom: isMobile ? '70px' : 0, 
       left: isMobile ? 0 : '80px', 
       right: 0, 
       background: 'rgba(255, 255, 255, 0.95)', 
@@ -70,7 +78,7 @@ const AdFooter = () => {
         width: '100%', 
         maxWidth: '1200px', 
         display: 'flex', 
-        flexDirection: isMobile ? 'column' : 'row', // 🌟 Stack on mobile
+        flexDirection: isMobile ? 'column' : 'row', 
         alignItems: 'center', 
         justifyContent: 'space-between',
         gap: isMobile ? '8px' : '20px'
@@ -79,38 +87,38 @@ const AdFooter = () => {
         {/* Left: Sponsor Info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: isMobile ? '100%' : 'auto' }}>
           <div style={{ 
-            width: isMobile ? '40px' : '60px', 
-            height: isMobile ? '30px' : '40px', 
-            background: '#f8fafc', 
+            width: isMobile ? '40px' : '50px', 
+            height: isMobile ? '40px' : '50px', 
+            background: '#fff', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            borderRadius: '6px', 
-            border: '1px solid #e2e8f0', 
+            borderRadius: '10px', 
+            border: '1px solid #f1f5f9', 
             overflow: 'hidden' 
           }}>
              {displayAd.bannerImage ? (
                <img src={displayAd.bannerImage} alt="Sponsor" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
              ) : (
-               <Gift size={isMobile ? 16 : 20} color="#3b82f6" />
+               <Gift size={isMobile ? 18 : 24} color="#3b82f6" />
              )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase' }}>Sponsored</span>
-            <span style={{ fontSize: isMobile ? '0.8rem' : '0.9rem', color: '#0f172a', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {displayAd.sponsorName} {!isMobile && <ExternalLink size={10} />}
+            <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sponsored Offer</span>
+            <span style={{ fontSize: isMobile ? '0.9rem' : '1rem', color: '#1e293b', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {displayAd.sponsorName}
             </span>
           </div>
           {isMobile && (
-            <div style={{ marginLeft: 'auto', fontSize: '0.85rem', fontWeight: '800', color: '#3b82f6' }}>
+            <div style={{ marginLeft: 'auto', fontSize: '0.9rem', fontWeight: '900', color: '#3b82f6' }}>
               {displayAd.discountText}
             </div>
           )}
         </div>
 
-        {/* Middle: Promo Text (Hidden or minimized on mobile) */}
+        {/* Middle: Promo Text */}
         {!isMobile && (
-          <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#3b82f6', textAlign: 'center', flex: 1 }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#3b82f6', textAlign: 'center', flex: 1, letterSpacing: '-0.5px' }}>
             {displayAd.discountText}
           </div>
         )}
@@ -120,24 +128,26 @@ const AdFooter = () => {
           <button 
             onClick={() => handleCopy(displayAd.couponCode)}
             style={{ 
-              background: copiedCode === displayAd.couponCode ? '#ecfdf5' : '#0f172a', 
-              color: copiedCode === displayAd.couponCode ? '#10b981' : 'white', 
+              background: copiedCode === displayAd.couponCode ? '#10b981' : '#0f172a', 
+              color: 'white', 
               border: 'none', 
-              padding: isMobile ? '8px 15px' : '10px 20px', 
-              borderRadius: '8px', 
+              padding: isMobile ? '12px 15px' : '12px 25px', 
+              borderRadius: '12px', 
               cursor: 'pointer', 
               fontWeight: '800', 
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontSize: '0.9rem',
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center', 
-              gap: '8px', 
+              gap: '10px', 
               width: isMobile ? '100%' : 'auto',
-              minWidth: isMobile ? 'none' : '150px'
+              minWidth: isMobile ? 'none' : '180px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
             }}
           >
-            {copiedCode === displayAd.couponCode ? <CheckCircle size={16} /> : <Copy size={16} />}
-            {displayAd.couponCode}
+            {copiedCode === displayAd.couponCode ? <CheckCircle size={18} /> : <Copy size={18} />}
+            <span style={{ letterSpacing: '1px' }}>{displayAd.couponCode}</span>
           </button>
         </div>
 
