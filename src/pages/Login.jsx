@@ -18,7 +18,10 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
-    const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/login`;
+    // 🛡️ URL SAFETY FILTER: Prevents 404s caused by missing vars or trailing slashes
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://feedtrace-api.onrender.com';
+    const cleanBaseUrl = baseUrl.replace(/\/$/, ''); // Removes trailing slash if present
+    const apiUrl = `${cleanBaseUrl}/api/auth/login`;
     
     try {
       const res = await fetch(apiUrl, {
@@ -32,27 +35,27 @@ const Login = () => {
       if (res.ok) {
         const userData = data.user || data;
 
-        // 🌟 KEY FIXES FOR DATA VISIBILITY 🌟
-        // 1. Save the username for ProtectedRoutes and Sidebar
+        // 🌟 DATA SYNCHRONIZATION 🌟
+        // 1. Save Name for ProtectedRoutes & Sidebar
         localStorage.setItem('feedtrace_user_name', userData.username || userData.name || "User");
         
-        // 2. Save the email explicitly so Profile.jsx can find it
+        // 2. Save Email explicitly for Profile/Settings visibility
         localStorage.setItem('feedtrace_user_email', userData.email || formData.email);
         
-        // 3. Save the full user object and token
+        // 3. Save full object and token for API calls
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(userData));
 
         toast.success(`Welcome back!`);
 
-        // 🚀 FORCE REFRESH: Ensures App.jsx re-renders and clears the login gate
+        // 🚀 REFRESH REDIRECT: Clears the "Gatekeeper" in App.jsx
         window.location.href = '/home'; 
       } else {
         toast.error(data.error || "Invalid Email or Password");
       }
     } catch (err) { 
       console.error("Login Error:", err);
-      toast.error("Connection failed. Check your internet or backend status."); 
+      toast.error("Connection failed. Your backend might be sleeping—please wait 30s and try again."); 
     } finally { 
       setLoading(false); 
     }
