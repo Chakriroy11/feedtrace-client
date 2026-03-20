@@ -1,0 +1,312 @@
+/* src/pages/Home.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* --- Professional Corporate Palette --- */
+  --bg-app: #f3f4f6;       /* Light Gray Background */
+  --bg-card: #ffffff;      /* Pure White Cards */
+  --bg-sidebar: #ffffff;
+  
+  --primary: #2563eb;      /* Royal Blue */
+  --primary-hover: #1d4ed8;
+  
+  --text-main: #111827;    /* Near Black */
+  --text-muted: #6b7280;   /* Medium Gray */
+  
+  --border: #e5e7eb;       /* Subtle Border */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- MASTER LAYOUT --- */
+.home-wrapper {
+  display: flex;        /* Aligns Sidebar and Content */
+  height: 100vh;        /* Full screen height */
+  width: 100vw;
+  overflow: hidden;     /* Prevents double scrollbars */
+}
+
+.main-content {
+  flex: 1;              /* Takes remaining space */
+  background: var(--bg-app);
+  overflow-y: auto;     /* Enables scrolling ONLY inside content */
+  padding: 32px;
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* --- DYNAMIC SIDEBAR (New Logic) --- */
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 12px;
+  flex-shrink: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth Slide Animation */
+  position: relative;
+  overflow: hidden; /* Hides text when shrinking */
+}
+
+/* STATE: OPEN */
+.sidebar.open {
+  width: 260px;
+}
+
+/* STATE: CLOSED */
+.sidebar.closed {
+  width: 80px;
+}
+
+/* Toggle Button */
+.sidebar-toggle-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  align-self: flex-start; /* Keeps it top-left */
+  margin-bottom: 20px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f3f4f6;
+  color: var(--primary);
+  border-color: var(--border);
+}
+
+/* Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 30px;
+  white-space: nowrap; /* Prevents text wrapping */
+  padding-left: 8px;
+}
+
+/* Hide Text when Closed */
+.sidebar.closed .logo-text,
+.sidebar.closed .nav-text {
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/* Nav Items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none; /* Just in case */
+}
+
+/* Center Icons when Closed */
+.sidebar.closed .nav-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px; /* Fixes icon jumpiness */
+}
+
+.nav-item:hover {
+  background-color: #f3f4f6;
+  color: var(--text-main);
+}
+
+.nav-item.active {
+  background-color: #eff6ff;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.logout-btn {
+  margin-top: auto;
+  color: #ef4444;
+}
+
+.logout-btn:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* --- TYPOGRAPHY --- */
+.page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 8px 0;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* --- GRID SYSTEM --- */
+.pro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* --- PRODUCT CARDS --- */
+.pro-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  position: relative;
+}
+
+.pro-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: #d1d5db;
+}
+
+.card-img-box {
+  width: 100%;
+  height: 200px;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.card-details {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* --- BUTTONS --- */
+.btn-primary, .gradient-btn {
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover, .gradient-btn:hover {
+  background: var(--primary-hover);
+}
+
+.btn-back {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.btn-back:hover {
+  background: #f9fafb;
+}
+
+/* --- HERO BANNER --- */
+.hero-banner, .gradient-hero {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-banner h1 {
+  color: var(--text-main);
+  font-size: 2rem;
+  margin: 0 0 8px 0;
+}

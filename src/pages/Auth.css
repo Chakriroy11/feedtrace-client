@@ -1,0 +1,193 @@
+/* src/pages/Auth.css */
+
+/* --- 1. GLOBAL RESET (Ensures no white gaps anywhere) --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+/* --- MAIN CONTAINER: Full Screen 50/50 Split --- */
+.auth-container {
+  display: flex;
+  width: 100vw;       /* Forces exactly 100% viewport width */
+  height: 100vh;      /* Forces exactly 100% viewport height */
+  overflow: hidden;   /* Prevents scrollbars */
+  font-family: 'Inter', sans-serif;
+  background: white;
+}
+
+/* --- LEFT SIDE: IMAGE CONTAINER --- */
+.auth-left {
+  width: 50vw;        /* EXPLICITLY 50% of the screen width */
+  height: 100vh;
+  /* Dark Teal background to blend with the image if 'contain' leaves space */
+  background-color: #003844; 
+  position: relative;
+  overflow: hidden;
+  display: flex;      
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- ANIMATION WRAPPER --- */
+.image-wrapper {
+  width: 100%;
+  height: 100%;
+  transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* --- THE IMAGE ITSELF --- */
+.auth-brand-img {
+  width: 100%;
+  height: 100%;
+  /* 'contain' ensures the LOGO TEXT is visible and not cropped */
+  object-fit: contain; 
+  object-position: center;
+  display: block;
+}
+
+/* --- ANIMATION STATES --- */
+.login-mode {
+  transform: scale(1);
+}
+
+.signup-mode {
+  transform: scale(1.1);
+}
+
+/* --- RIGHT SIDE: FORM AREA --- */
+.auth-right {
+  width: 50vw;        /* EXPLICITLY 50% of the screen width */
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* --- TYPOGRAPHY & GRADIENTS --- */
+.auth-header {
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.auth-header h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #0ea5e9 0%, #10b981 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-header p {
+  font-size: 1.05rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.auth-header span {
+  color: #f97316;
+  font-weight: 600;
+}
+
+/* --- INPUT FIELDS --- */
+.input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  transition: color 0.3s ease;
+  z-index: 10;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 16px 16px 16px 50px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.input-group input:focus ~ .input-icon {
+  color: #8b5cf6;
+}
+
+/* --- GRADIENT BUTTON --- */
+.auth-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(90deg, #0ea5e9 0%, #22c55e 50%, #8b5cf6 100%);
+  background-size: 200% auto;
+  transition: all 0.5s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.auth-btn:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+/* --- FOOTER --- */
+.auth-footer {
+  margin-top: 30px;
+  text-align: center;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.link-text {
+  cursor: pointer;
+  font-weight: 700;
+  background: linear-gradient(90deg, #22c55e, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-left: 5px;
+}
+
+/* Mobile: Hide Image, Form takes full width */
+@media (max-width: 900px) {
+  .auth-left { display: none; }
+  .auth-right { width: 100vw; }
+}
