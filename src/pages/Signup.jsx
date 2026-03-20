@@ -8,7 +8,6 @@ import logoImg from '../assets/logo.jpg';
 const Signup = () => {
   const navigate = useNavigate();
   
-  // 🌟 Ensure 'username' matches your MongoDB Schema
   const [formData, setFormData] = useState({ 
     username: '', 
     email: '', 
@@ -22,7 +21,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     
-    // 🚀 FIXED: URL now uses backticks (`) to properly read VITE_API_URL
+    // 🌐 Points to your Render Backend
     const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/signup`;
     
     try {
@@ -32,24 +31,30 @@ const Signup = () => {
         body: JSON.stringify(formData)
       });
 
-      // 🛡️ GUARD: Prevent crash if backend returns HTML (Common on Render errors)
+      // 🛡️ Content-Type Guard
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Backend connection issue. Check your Render URL.");
+        throw new Error("Server returned an invalid response. Please check your backend.");
       }
 
       const data = await res.json();
       
       if (res.ok) {
-        toast.success("Account created successfully! Please log in.");
-        navigate('/login'); 
+        toast.success("Account created successfully! Redirecting to login...");
+        
+        // 🌟 Optional: Pre-fill the login email for convenience
+        localStorage.setItem('temp_signup_email', formData.email);
+        
+        // Give the toast a second to be seen
+        setTimeout(() => {
+          navigate('/login'); 
+        }, 1500);
       } else {
-        // Handle specific error messages from your authRoutes.js
-        toast.error(data.error || "Signup failed. Email might already be in use.");
+        toast.error(data.error || "Signup failed. This email may already be registered.");
       }
     } catch (err) { 
       console.error("Signup Error:", err);
-      toast.error(err.message || "Server Error: Could not connect to backend."); 
+      toast.error(err.message || "Could not connect to the server."); 
     }
     finally { setLoading(false); }
   };
@@ -74,7 +79,7 @@ const Signup = () => {
           
           <div className="auth-header">
             <h2>Create Account</h2>
-            <p>Join <span>FeedTrace</span> today.</p>
+            <p>Join <span style={{color: '#3b82f6', fontWeight: 'bold'}}>FeedTrace</span> today.</p>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -117,17 +122,22 @@ const Signup = () => {
               />
             </div>
 
-            <button type="submit" disabled={loading} className="auth-btn">
+            <button type="submit" disabled={loading} className="auth-btn" style={{
+              background: 'linear-gradient(90deg, #00AEEF 0%, #22c55e 100%)',
+              color: 'white',
+              fontWeight: 'bold',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}>
               {loading ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <Loader2 className="animate-spin" size={18} />
-                  Verifying...
+                  Creating Account...
                 </div>
               ) : 'Sign Up'}
             </button>
           </form>
 
-          <div className="auth-footer">
+          <div className="auth-footer" style={{marginTop: '20px', textAlign: 'center'}}>
             Already have an account? 
             <span onClick={() => navigate('/login')} className="link-text" style={{ marginLeft: '5px', cursor: 'pointer', color: '#3b82f6', fontWeight: 'bold' }}>
               Log in

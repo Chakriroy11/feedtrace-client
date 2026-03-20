@@ -18,7 +18,6 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
-    // 🌐 Points to your Render Backend
     const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/login`;
     
     try {
@@ -33,10 +32,14 @@ const Login = () => {
       if (res.ok) {
         const userData = data.user || data;
 
-        // 🔑 KEY FIX: App.jsx looks for 'feedtrace_user_name' to unlock ProtectedRoutes
+        // 🌟 KEY FIXES FOR DATA VISIBILITY 🌟
+        // 1. Save the username for ProtectedRoutes and Sidebar
         localStorage.setItem('feedtrace_user_name', userData.username || userData.name || "User");
         
-        // 💾 Save supplementary data
+        // 2. Save the email explicitly so Profile.jsx can find it
+        localStorage.setItem('feedtrace_user_email', userData.email || formData.email);
+        
+        // 3. Save the full user object and token
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(userData));
 
@@ -67,7 +70,7 @@ const Login = () => {
       overflow: 'hidden'
     }}>
       
-      {/* --- LEFT: BRANDING IMAGE (50% Split) --- */}
+      {/* --- LEFT: BRANDING IMAGE --- */}
       <div className="auth-left" style={{ 
         flex: isMobile ? '0 0 35%' : '0 0 50%', 
         height: isMobile ? '35vh' : '100vh',
@@ -80,7 +83,7 @@ const Login = () => {
         />
       </div>
 
-      {/* --- RIGHT: CENTERED FORM (50% Split) --- */}
+      {/* --- RIGHT: CENTERED FORM --- */}
       <div className="auth-right" style={{ 
         flex: isMobile ? '1' : '0 0 50%', 
         display: 'flex', 
