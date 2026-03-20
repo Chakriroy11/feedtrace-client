@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast'; 
-import { useResponsive } from './hooks/useResponsive'; // 🌟 Import the hook
+import { useResponsive } from './hooks/useResponsive';
 
-// Pages
+// Pages & Components
 import LandingPage from './pages/Landing'; 
 import Home from './pages/Home';
 import ProductDetails from './pages/ProductDetails';
@@ -15,81 +15,72 @@ import CategoryPage from './pages/CategoryPage';
 import SubCategoryPage from './pages/SubCategoryPage'; 
 import Login from './pages/Login'; 
 import Signup from './pages/Signup'; 
-
-// Components
 import Sidebar from './components/Sidebar';
 import AdFooter from './components/AdFooter';
 
 // --- THE GUARD COMPONENT ---
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('feedtrace_user_name'); 
-  const { isMobile } = useResponsive(); // 📱 Listen for mobile screen
+  // We check storage directly inside the component every time it mounts
+  const user = localStorage.getItem('feedtrace_user_name'); 
+  const { isMobile } = useResponsive();
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   return (
     <div style={{ 
       display: 'flex', 
-      flexDirection: isMobile ? 'column' : 'row', // Stack vertically on mobile
+      flexDirection: isMobile ? 'column' : 'row', 
       minHeight: '100vh', 
       background: '#f8fafc' 
     }}>
       <Sidebar />
-      
       <div style={{ 
         flex: 1, 
-        // 🌟 DYNAMIC MARGIN: No left margin on mobile because sidebar is at the bottom
         marginLeft: isMobile ? '0' : '80px', 
-        // 🌟 DYNAMIC PADDING: Less padding on mobile to save space
         padding: isMobile ? '20px 15px 100px 15px' : '40px', 
         transition: 'all 0.3s ease',
-        display: 'flex',            
-        flexDirection: 'column'      
+        display: 'flex', flexDirection: 'column'      
       }}>
-        
-        {/* Main Content Area */}
-        <div style={{ flex: 1 }}>
-          {children}
-        </div>
-
-        {/* --- GLOBAL SPONSOR ADS --- */}
-        <div style={{ marginTop: '40px' }}>
-          <AdFooter />
-        </div>
-        
+        <div style={{ flex: 1 }}>{children}</div>
+        <div style={{ marginTop: '40px' }}><AdFooter /></div>
       </div>
     </div>
   );
 };
 
 function App() {
-  const isAuthenticated = localStorage.getItem('feedtrace_user_name');
+  // 🌟 NEW: State to track authentication status
+  const [user, setUser] = useState(localStorage.getItem('feedtrace_user_name'));
+
+  // 🌟 NEW: Listen for changes in storage (to handle login/logout immediately)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(localStorage.getItem('feedtrace_user_name'));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Periodically check (useful for same-tab updates)
+    const interval = setInterval(handleStorageChange, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <Router>
-      <Toaster 
-        position="top-center" 
-        reverseOrder={false} 
-        toastOptions={{
-          style: {
-            fontSize: '1rem',
-            fontWeight: '600',
-            borderRadius: '10px',
-            background: '#333',
-            color: '#fff',
-          },
-        }}
-      />
+      <Toaster position="top-center" />
       
       <Routes>
-        <Route path="/" element={
-           isAuthenticated ? <Navigate to="/home" /> : <LandingPage />
-        } />
+        {/* Landing logic based on current user state */}
+        <Route path="/" element={ user ? <Navigate to="/home" replace /> : <LandingPage /> } />
         
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} /> 
+        {/* Pass user state to Login if needed, or just let it navigate */}
+        <Route path="/login" element={ user ? <Navigate to="/home" replace /> : <Login /> } />
+        <Route path="/signup" element={ user ? <Navigate to="/home" replace /> : <Signup /> } /> 
 
         {/* --- PROTECTED ROUTES --- */}
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
