@@ -15,12 +15,15 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // 🚀 FIXED: Changed single quotes to backticks (`)
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/all`);
+        // 🚀 URL SAFETY: Added a fallback in case env var is missing
+        const baseUrl = import.meta.env.VITE_API_URL || 'https://feedtrace-api.onrender.com';
+        const res = await fetch(`${baseUrl.replace(/\/$/, '')}/api/products/all`);
+        
         if (res.ok) {
           const data = await res.json();
-          // We show the latest 4 products on the home screen
-          setProducts(Array.isArray(data) ? data.slice(-4).reverse() : []); 
+          // 🛡️ DATA GUARD: Ensure data is an array before slicing
+          const safeData = Array.isArray(data) ? data : [];
+          setProducts(safeData.slice(-4).reverse()); 
         }
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -76,7 +79,6 @@ const Home = () => {
             Discover AI-verified reviews and trusted technical specs for your next big purchase.
           </p>
           
-          {/* --- SEARCH BAR --- */}
           <form onSubmit={handleSearch} style={{ 
             display: 'flex', 
             background: 'white', 
@@ -95,7 +97,7 @@ const Home = () => {
               placeholder="Search products, brands..." 
               style={{ border: 'none', outline: 'none', width: '100%', fontSize: '1rem', background: 'transparent', color: '#0f172a' }} 
             />
-            <button type="submit" style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }}>
+            <button type="submit" style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem' }}>
               Search
             </button>
           </form>
@@ -161,6 +163,10 @@ const Home = () => {
           <div style={{ textAlign: 'center', padding: '40px' }}>
             <Loader2 className="animate-spin" size={32} color="#3b82f6" style={{ margin: '0 auto' }} />
           </div>
+        ) : products.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', border: '2px dashed #f1f5f9', borderRadius: '20px' }}>
+            No products found.
+          </div>
         ) : (
           <div style={{ 
             display: 'grid', 
@@ -179,21 +185,18 @@ const Home = () => {
                   cursor: 'pointer', 
                   display: 'flex', 
                   flexDirection: 'column',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)'
+                  transition: 'all 0.3s ease'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'}
               >
                 <div style={{ height: isMobile ? '160px' : '220px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                   <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div style={{ padding: '20px', borderTop: '1px solid #f8fafc' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{product.brand}</span>
+                  <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: '900', textTransform: 'uppercase' }}>{product.brand}</span>
                   <h3 style={{ margin: '6px 0 12px 0', fontSize: '1rem', fontWeight: '700', color: '#0f172a', height: '2.6em', overflow: 'hidden', lineHeight: '1.3' }}>{product.name}</h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: '900', fontSize: '1.2rem', color: '#1e293b' }}>₹{product.price?.toLocaleString()}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#d97706', fontSize: '0.85rem', fontWeight: '800', background: '#fffbeb', padding: '4px 8px', borderRadius: '8px' }}>
+                    <span style={{ fontWeight: '900', fontSize: '1.2rem', color: '#1e293b' }}>₹{Number(product.price || 0).toLocaleString()}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#d97706', fontSize: '0.85rem', fontWeight: '800' }}>
                       <Star size={14} fill="#d97706" /> 4.8
                     </div>
                   </div>
