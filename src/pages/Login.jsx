@@ -18,10 +18,18 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
-    // 🛡️ URL SAFETY FILTER: Prevents 404s caused by missing vars or trailing slashes
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://feedtrace-api.onrender.com';
-    const cleanBaseUrl = baseUrl.replace(/\/$/, ''); // Removes trailing slash if present
+    // 🛡️ ULTRA-SAFETY FALLBACK 🛡️
+    // If Vercel fails to read your .env, we manually point to Render.
+    const envUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = (envUrl && envUrl.length > 5 && !envUrl.includes('import.meta')) 
+      ? envUrl 
+      : 'https://feedtrace-api.onrender.com';
+
+    // Remove any trailing slashes to prevent //api/auth/login errors
+    const cleanBaseUrl = baseUrl.replace(/\/$/, ''); 
     const apiUrl = `${cleanBaseUrl}/api/auth/login`;
+
+    console.log("🚀 Attempting connection to:", apiUrl);
     
     try {
       const res = await fetch(apiUrl, {
@@ -35,27 +43,22 @@ const Login = () => {
       if (res.ok) {
         const userData = data.user || data;
 
-        // 🌟 DATA SYNCHRONIZATION 🌟
-        // 1. Save Name for ProtectedRoutes & Sidebar
+        // 🌟 LOCAL STORAGE SYNC 🌟
         localStorage.setItem('feedtrace_user_name', userData.username || userData.name || "User");
-        
-        // 2. Save Email explicitly for Profile/Settings visibility
         localStorage.setItem('feedtrace_user_email', userData.email || formData.email);
-        
-        // 3. Save full object and token for API calls
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(userData));
 
         toast.success(`Welcome back!`);
 
-        // 🚀 REFRESH REDIRECT: Clears the "Gatekeeper" in App.jsx
+        // 🚀 FORCE REFRESH: Clears the ProtectedRoute gate in App.jsx
         window.location.href = '/home'; 
       } else {
         toast.error(data.error || "Invalid Email or Password");
       }
     } catch (err) { 
-      console.error("Login Error:", err);
-      toast.error("Connection failed. Your backend might be sleeping—please wait 30s and try again."); 
+      console.error("Login Error Details:", err);
+      toast.error("Connection failed. Your backend might be waking up—please wait 30s."); 
     } finally { 
       setLoading(false); 
     }
@@ -73,7 +76,6 @@ const Login = () => {
       overflow: 'hidden'
     }}>
       
-      {/* --- LEFT: BRANDING IMAGE --- */}
       <div className="auth-left" style={{ 
         flex: isMobile ? '0 0 35%' : '0 0 50%', 
         height: isMobile ? '35vh' : '100vh',
@@ -86,7 +88,6 @@ const Login = () => {
         />
       </div>
 
-      {/* --- RIGHT: CENTERED FORM --- */}
       <div className="auth-right" style={{ 
         flex: isMobile ? '1' : '0 0 50%', 
         display: 'flex', 
@@ -146,14 +147,12 @@ const Login = () => {
               Sign Up
             </span>
           </div>
-
         </div>
       </div>
     </div>
   );
 };
 
-// --- STYLES ---
 const inputGroupStyle = { display: 'flex', alignItems: 'center', gap: '15px', background: '#fff', border: '1.5px solid #E2E8F0', padding: '18px 25px', borderRadius: '15px' };
 const inputStyle = { border: 'none', outline: 'none', width: '100%', fontSize: '1rem', color: '#1E293B' };
 const buttonStyle = { 
