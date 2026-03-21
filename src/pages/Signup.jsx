@@ -21,9 +21,18 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     
-    // 🌐 Points to your Render Backend
-    const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/signup`;
+    // 🛡️ ULTRA-SAFETY FALLBACK 🛡️
+    const envUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = (envUrl && envUrl.length > 5 && !envUrl.includes('import.meta')) 
+      ? envUrl 
+      : 'https://feedtrace-api.onrender.com';
+
+    // Remove any trailing slashes to prevent //api/auth/signup errors
+    const cleanBaseUrl = baseUrl.replace(/\/$/, ''); 
+    const apiUrl = `${cleanBaseUrl}/api/auth/signup`;
     
+    console.log("🚀 Attempting Signup at:", apiUrl);
+
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -31,21 +40,19 @@ const Signup = () => {
         body: JSON.stringify(formData)
       });
 
-      // 🛡️ Content-Type Guard
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server returned an invalid response. Please check your backend.");
+        throw new Error("Server returned an invalid response. Your backend might be waking up.");
       }
 
       const data = await res.json();
       
       if (res.ok) {
-        toast.success("Account created successfully! Redirecting to login...");
+        toast.success("Account created! Redirecting to login...");
         
-        // 🌟 Optional: Pre-fill the login email for convenience
+        // Pre-fill login for convenience
         localStorage.setItem('temp_signup_email', formData.email);
         
-        // Give the toast a second to be seen
         setTimeout(() => {
           navigate('/login'); 
         }, 1500);
@@ -54,15 +61,13 @@ const Signup = () => {
       }
     } catch (err) { 
       console.error("Signup Error:", err);
-      toast.error(err.message || "Could not connect to the server."); 
+      toast.error(err.message || "Connection failed. Please wait 30s and try again."); 
     }
     finally { setLoading(false); }
   };
 
   return (
     <div className="auth-container">
-      
-      {/* LEFT SIDE: BRANDING */}
       <div className="auth-left">
         <div className="image-wrapper signup-mode">
           <img src={logoImg} alt="FeedTrace" className="auth-brand-img" />
@@ -73,10 +78,8 @@ const Signup = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE: FORM */}
       <div className="auth-right">
         <div className="auth-card">
-          
           <div className="auth-header">
             <h2>Create Account</h2>
             <p>Join <span style={{color: '#3b82f6', fontWeight: 'bold'}}>FeedTrace</span> today.</p>
@@ -86,39 +89,24 @@ const Signup = () => {
             <div className="input-group">
               <User size={20} className="input-icon"/>
               <input 
-                type="text" 
-                name="username" 
-                placeholder="Full Name" 
-                required 
-                value={formData.username}
-                onChange={handleChange} 
-                autoComplete="name"
+                type="text" name="username" placeholder="Full Name" required 
+                value={formData.username} onChange={handleChange} autoComplete="name"
               />
             </div>
 
             <div className="input-group">
               <Mail size={20} className="input-icon"/>
               <input 
-                type="email" 
-                name="email" 
-                placeholder="Email Address" 
-                required 
-                value={formData.email}
-                onChange={handleChange} 
-                autoComplete="email"
+                type="email" name="email" placeholder="Email Address" required 
+                value={formData.email} onChange={handleChange} autoComplete="email"
               />
             </div>
             
             <div className="input-group">
               <Lock size={20} className="input-icon"/>
               <input 
-                type="password" 
-                name="password" 
-                placeholder="Create Password" 
-                required 
-                value={formData.password}
-                onChange={handleChange} 
-                autoComplete="new-password"
+                type="password" name="password" placeholder="Create Password" required 
+                value={formData.password} onChange={handleChange} autoComplete="new-password"
               />
             </div>
 
@@ -143,7 +131,6 @@ const Signup = () => {
               Log in
             </span>
           </div>
-
         </div>
       </div>
     </div>
